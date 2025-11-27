@@ -53,61 +53,72 @@ This backend is suitable for real-world e-commerce applications and excellent fo
 
 EcommerceProject/
 ├── Controller/
-│ ├── AuthController
-│ ├── ProductController
-│ ├── CategoryController
-│ ├── CartController
-│ └── OrderController
+│ ├── AuthController.java
+│ ├── ProductController.java
+│ ├── CategoryController.java
+│ ├── CartController.java
+│ └── OrderController.java
 │
 ├── Model/
-│ ├── User, Role
-│ ├── Product, Category
-│ ├── Cart, CartItem
-│ ├── Order
-│ ├── Address
-│ └── Payment
+│ ├── User.java
+│ ├── Role.java
+│ ├── Product.java
+│ ├── Category.java
+│ ├── Cart.java
+│ ├── CartItem.java
+│ ├── Order.java
+│ ├── Address.java
+│ └── Payment.java
 │
 ├── Security/
 │ ├── jwt/
-│ │ ├── AuthTokenFilter
-│ │ ├── JwtUtils
-│ │ └── EntryPointJwt
-│ ├── services/ (UserDetailsServiceImpl, WebSecurityConfig)
-│ ├── request/ (LoginRequest, SignupRequest)
-│ └── response/ (UserInfoResponse, MessageResponse)
+│ │ ├── AuthTokenFilter.java
+│ │ ├── JwtUtils.java
+│ │ └── EntryPointJwt.java
+│ │
+│ ├── services/
+│ │ ├── UserDetailsServiceImpl.java
+│ │ └── WebSecurityConfig.java
+│ │
+│ ├── request/
+│ │ ├── LoginRequest.java
+│ │ └── SignupRequest.java
+│ │
+│ └── response/
+│ ├── UserInfoResponse.java
+│ └── MessageResponse.java
 │
 ├── payload/
-│ ├── ProductDTO, ProductResponse
-│ ├── CategoryDTO
-│ ├── CartDTO
-│ ├── OrderDTO
-│ └── Pagination responses
+│ ├── ProductDTO.java
+│ ├── ProductResponse.java
+│ ├── CategoryDTO.java
+│ ├── CartDTO.java
+│ ├── OrderDTO.java
+│ └── PaginationResponse.java
 │
 ├── repositories/
-│ ├── UserRepository
-│ ├── ProductRepository
-│ ├── CategoryRepository
-│ ├── CartRepository
-│ ├── OrderRepository
-│ └── RoleRepository
+│ ├── UserRepository.java
+│ ├── ProductRepository.java
+│ ├── CategoryRepository.java
+│ ├── CartRepository.java
+│ ├── OrderRepository.java
+│ └── RoleRepository.java
 │
 ├── service/
-│ ├── ProductServiceImpl
-│ ├── CategoryServiceImpl
-│ ├── CartServiceImpl
-│ ├── OrderServiceImpl
-│ └── AuthServiceImpl
+│ ├── ProductServiceImpl.java
+│ ├── CategoryServiceImpl.java
+│ ├── CartServiceImpl.java
+│ ├── OrderServiceImpl.java
+│ └── AuthServiceImpl.java
 │
 ├── Exception/
-│ ├── GlobalExceptionHandler
-│ └── ResourceNotFoundException
+│ ├── GlobalExceptionHandler.java
+│ └── ResourceNotFoundException.java
 │
-├── config/
-│ ├── SwaggerConfig
-│ ├── WebMvcConfig
-│ └── AppConstants
-
-
+└── config/
+├── SwaggerConfig.java
+├── WebMvcConfig.java
+└── AppConstants.java
 ---
 
 ## 🛢️ Database Entities
@@ -179,8 +190,3 @@ Relationships used:
 git clone https://github.com/TasteTheThunder/Ecommerce-backend.git
 cd Ecommerce-backend
 
-👨‍💻 Author
-
-Aditya Raj
-Backend Developer — Java | Spring Boot
-Open to internships & SDE roles.
