@@ -79,7 +79,8 @@ public class AuthServiceImpl implements AuthService {
         UserInfoResponse userInfo = new UserInfoResponse(
                 userDetails.getId(),
                 userDetails.getUsername(),
-                List.of(primaryRole), // return only one role
+                List.of(primaryRole),// return only one role
+                userDetails.getEmail(),
                 jwtToken               // include token in response
         );
 

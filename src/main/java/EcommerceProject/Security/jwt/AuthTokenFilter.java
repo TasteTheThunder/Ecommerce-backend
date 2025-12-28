@@ -63,16 +63,16 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 //    }
 
     private String parseJwt(HttpServletRequest request) {
+        String path = request.getRequestURI();
         String jwtFromCookie = jwtUtils.getJwtFromCookies(request);
-        if (jwtFromCookie != null) {
-            return jwtFromCookie;
-        }
-
         String jwtFromHeader = jwtUtils.getJwtFromHeader(request);
-        if (jwtFromHeader != null) {
-            return jwtFromHeader;
-        }
 
-        return null;
+        System.out.println("\n======= JWT DEBUG =======");
+        System.out.println("URL: " + path);
+        System.out.println("JWT from Cookie: " + jwtFromCookie);
+        System.out.println("JWT from Authorization Header: " + jwtFromHeader);
+        System.out.println("=========================\n");
+
+        return jwtFromCookie != null ? jwtFromCookie : jwtFromHeader;
     }
 }
