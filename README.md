@@ -1,218 +1,120 @@
-Sb-Ecom (Ecommerce Spring Boot Backend)
+# 🛒 Ecommerce Backend — Spring Boot
 
-Overview
---------
-Sb-Ecom is a Spring Boot backend for an e-commerce application. It provides REST endpoints for products, categories, carts, orders, authentication (JWT), and file/image serving. The project uses Spring Boot 3, Spring Data JPA (PostgreSQL), Spring Security with JWT, and ModelMapper. OpenAPI UI is available via springdoc.
+A complete **E-commerce Backend** built with **Spring Boot**, implementing authentication (JWT), product management, categories, cart, orders, user roles, file uploads, and more.  
+Designed using clean layered architecture with DTOs, services, repositories, and centralized exception handling.
 
-Contents
---------
-- Build & run instructions (Maven, Java 21)
-- Local development configuration (PostgreSQL, application.properties)
-- Docker Compose example for quick local DB
-- API docs and testing
-- Image storage and static serving
-- Common errors & troubleshooting
-- Contributing, license, and contact
+This backend is suitable for real-world e-commerce applications and excellent for placement/internship showcase.
 
-Quick prerequisites
--------------------
-- Java 21 (JDK 21)
-- Maven 3.8+ (or the included Maven wrapper)
-- PostgreSQL (or change to a supported DB in application.properties)
-- Git (for pushing to GitHub)
+---
 
-Project basics
---------------
-- Artifact: Sb-Ecom
-- Java version: 21 (see pom.xml -> <java.version>21</java.version>)
-- Default server port: 9090 (configured in application.properties)
-- Default DB: PostgreSQL (jdbc:postgresql://localhost:5432/ecommerce)
+## 🚀 Features
 
-Important configuration (defaults)
-----------------------------------
-See src/main/resources/application.properties for the project's default values. Notable keys:
+### 🔐 Authentication & User Management
+- User Registration (Signup)
+- Login with **JWT Token**
+- Role-based access — `USER`, `ADMIN`
+- View Profile Endpoint (`/me`)
+- Secure endpoints using Spring Security + JWT
+- Custom exception handling for unauthorized access
 
-- server.port=9090
-- spring.datasource.url=jdbc:postgresql://localhost:5432/ecommerce
-- spring.datasource.username=postgres
-- spring.datasource.password=<your-db-password>
-- spring.jpa.hibernate.ddl-auto=update
-- project.image=images/              # local images directory
-- spring.app.jwtSecret=<long-secret> # replace for production
-- spring.app.jwtExpirationMs=3000000
-- frontend.url=http://localhost:5173
-- image.base.url=http://localhost:9090/images
+### 📦 Product Management
+- Create, update, delete products (**Admin only**)
+- Fetch all products
+- Fetch single product
+- Pagination & Sorting support
+- Product-Category relationship
+- Product image upload + static file serving
 
-Security note: Do NOT commit secrets (database passwords, JWT secrets) to version control. Use environment variables or externalized configuration in production.
+### 🗂️ Category Management
+- Add, update, delete categories
+- Assign categories to products
+- Fetch all categories
 
-Build & run (local)
--------------------
-From project root (Windows PowerShell):
+### 🛒 Cart Module
+- Add items to cart
+- Remove items from cart
+- Update quantity
+- Auto-calculate total cart value
+- One cart per user
 
-1) Using Maven wrapper (recommended if you don't have Maven installed):
+### 🧾 Orders
+- Convert cart to order
+- Order history for user
+- Admin: fetch all orders
+- Payment & delivery details stored
 
-```powershell
-# make the wrapper executable if needed (Git Bash/Cygwin); on Windows PowerShell you can run directly
-./mvnw clean package; ./mvnw spring-boot:run
-```
+### 🖼️ Media Handling
+- Static image handling via `/uploads/**`
+- File storage configured in `WebMvcConfig`
 
-2) Using installed Maven:
+---
 
-```powershell
-mvn clean package; mvn spring-boot:run
-```
+## 🛢️ Database Entities
 
-3) Run the packaged jar:
+- **User**
+- **Role**
+- **Product**
+- **Category**
+- **Cart & CartItem**
+- **Order**
+- **Address**
+- **Payment**
 
-```powershell
-mvn clean package
-java -jar target/Sb-Ecom-0.0.1-SNAPSHOT.jar
-```
+Relationships used:
+- One-to-Many
+- Many-to-One
+- Many-to-Many (User ↔ Roles)
+- Cascade operations (where required)
 
-Database setup (PostgreSQL)
----------------------------
-Create the database and user (example commands):
+---
 
-```sql
--- run in psql or pgAdmin
-CREATE DATABASE ecommerce;
--- if using default 'postgres' user you may only need the DB
--- alternatively create an app user:
-CREATE USER sb_ecom WITH ENCRYPTED PASSWORD 'yourpassword';
-GRANT ALL PRIVILEGES ON DATABASE ecommerce TO sb_ecom;
-```
+## 📌 API Endpoints Overview
 
-Update the values in src/main/resources/application.properties or override via environment variables (recommended):
-- SPRING_DATASOURCE_URL
-- SPRING_DATASOURCE_USERNAME
-- SPRING_DATASOURCE_PASSWORD
-- SPRING_APP_JWTSECRET
+### 🔐 Auth Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/signup` | Register new user |
+| POST | `/api/auth/login` | Login + JWT |
+| GET | `/api/auth/me` | Get logged-in user |
 
-Docker Compose (optional)
--------------------------
-A quick docker-compose for PostgreSQL (create a docker-compose.yml in the project root):
+### 📦 Product Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products/` | Get all products |
+| GET | `/api/products/{id}` | Get single product |
+| POST | `/api/products/` | Add product (Admin) |
+| PUT | `/api/products/{id}` | Update product |
+| DELETE | `/api/products/{id}` | Delete product |
 
-```yaml
-version: '3.8'
-services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: ecommerce
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: example
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+### 🗂️ Category Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/categories/` | Get categories |
+| POST | `/api/categories/` | Add category |
+| PUT | `/api/categories/{id}` | Update category |
+| DELETE | `/api/categories/{id}` | Delete category |
 
-volumes:
-  pgdata:
-```
+### 🛒 Cart Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/cart/add` | Add item to cart |
+| GET | `/api/cart/{id}` | Get user cart |
+| PUT | `/api/cart/update` | Update quantity |
+| DELETE | `/api/cart/remove/{itemId}` | Remove item |
 
-Then run:
+### 🧾 Order Routes
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/orders/` | Place order |
+| GET | `/api/orders/user` | User order history |
+| GET | `/api/orders/all` | All orders (Admin) |
 
-```powershell
-docker-compose up -d
-```
+---
 
-Remember to update application.properties to match the docker credentials (or set env vars).
+## ⚙️ How to Run Locally
 
-API documentation
------------------
-The project includes springdoc OpenAPI UI. Once the app runs, visit the OpenAPI UI to explore endpoints (Swagger UI):
-
-http://localhost:9090/swagger-ui/index.html
-
-Common endpoints (examples)
----------------------------
-- /api/auth/**   -> Authentication (login/register)
-- /api/products/** -> Product CRUD and listing
-- /api/categories/** -> Category endpoints
-- /api/cart/** -> Cart operations
-- /api/orders/** -> Create and manage orders
-
-(Exact paths may vary; use the Swagger UI to list all available endpoints.)
-
-Images / static files
----------------------
-Images are stored under the project's `images/` folder. The property `project.image` in application.properties points to this directory. The app exposes images at the base URL configured with `image.base.url` (default: http://localhost:9090/images).
-
-If you add images, place them in the `images/` directory at the project root so Spring's static resource mapping can serve them (or adjust the mapping in AppConfig/WebMvcConfig if changed).
-
-JWT & Authentication notes
---------------------------
-- JWT secret is configured via `spring.app.jwtSecret` in application.properties. For production, set a strong secret through environment variables or a secret manager.
-- Cookie name: spring.ecom.app.jwtCookieName (configured in properties).
-
-Development tips
-----------------
-- Use IDE run/debug (IntelliJ IDEA) to run `SbEcomApplication` main class.
-- To see SQL logs, ensure `spring.jpa.show-sql=true` and adjust logging levels in application.properties if needed.
-- To reset the schema during local development, change `spring.jpa.hibernate.ddl-auto` (e.g., create-drop). Be careful with destructive options.
-
-Pushing this repository to GitHub
---------------------------------
-If you want to push this local project to the GitHub repository `https://github.com/TasteTheThunder/Ecommerce-backend.git`, run (PowerShell):
-
-```powershell
-# check current remote
-git remote -v
-# remove existing origin if it's incorrect
-git remote remove origin; git remote add origin https://github.com/TasteTheThunder/Ecommerce-backend.git
-git add .; git commit -m "Initial import"; git push -u origin HEAD
-```
-
-If you prefer SSH and have keys configured:
-
-```powershell
-git remote set-url origin git@github.com:TasteTheThunder/Ecommerce-backend.git; git push -u origin HEAD
-```
-
-Note: If your repository already has commits, you may want to set the correct branch (main/master) or force-push only after confirming.
-
-Common errors & troubleshooting
--------------------------------
-- "Connection refused" to PostgreSQL: ensure PostgreSQL is running and accessible on the configured host/port. Check credentials and DB name.
-- Port 9090 in use: change `server.port` in application.properties or stop the other service.
-- Missing JWT secret: set `spring.app.jwtSecret` via environment variables in production.
-- File upload / image write errors: ensure the process has write permission to the `images/` directory.
-
-Testing
--------
-The project includes unit/integration test scaffolding (spring-boot-starter-test). Run tests with:
-
-```powershell
-mvn test
-```
-
-Contributing
-------------
-- Fork the repository, create a topic branch, add tests for new behavior, and open a pull request.
-- Keep credentials secret; prefer `.env`, system properties, or CI secrets.
-
-License
--------
-This README does not include a license file. If you want an open-source license, consider adding a LICENSE file (for example MIT) and reference it here.
-
-Contact
--------
-For questions about this project or to report issues, open a GitHub issue in the repository.
-
-Acknowledgements
-----------------
-This project uses Spring Boot, Spring Data JPA, Spring Security (JWT), ModelMapper, and springdoc for OpenAPI.
-
-
-Requirements coverage
----------------------
-- Build & Run: Done
-- DB setup & Docker helper: Done
-- API docs: Done
-- Static images: Done
-- Git push instructions: Done
-- Troubleshooting & common errors: Done
-
-
-Enjoy working on Sb-Ecom!
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/TasteTheThunder/Ecommerce-backend.git
+cd Ecommerce-backend
 
