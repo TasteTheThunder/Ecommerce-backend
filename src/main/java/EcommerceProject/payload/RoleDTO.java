@@ -1,4 +1,4 @@
-package com.ecommerce.project.payload;
+package EcommerceProject.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO {
-    private Long categoryID;
-    private String categoryName;
+public class RoleDTO {
+    private Long roleId;
+    private String roleName;
 }
+

@@ -11,10 +11,16 @@ import EcommerceProject.Security.request.SignupRequest;
 import EcommerceProject.Security.response.MessageResponse;
 import EcommerceProject.Security.response.UserInfoResponse;
 import EcommerceProject.Security.services.UserDetailsImpl;
+import EcommerceProject.payload.*;
 import EcommerceProject.repositories.RoleRepository;
 import EcommerceProject.repositories.UserRepository;
+import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,111 +33,88 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class AuthServiceImpl implements AuthService {
-
-    @Autowired
-    private JwtUtils jwtUtils;
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserRepository userRepository;
+    private JwtUtils jwtUtils;
 
     @Autowired
-    private RoleRepository roleRepository;
+    UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder encoder;
+    RoleRepository roleRepository;
+
+    @Autowired
+    PasswordEncoder encoder;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @Override
-    public Map<String, Object> authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication;
-        try {
-            authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
-                            loginRequest.getPassword()
-                    ));
-        } catch (AuthenticationException exception) {
-            throw new APIException("Bad credentials");
-        }
+    public AuthenticationResult login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-        // Set authentication in security context
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Get logged-in user details
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        // Generate JWT cookie for browser
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
-        // Pick only one primary role
-        String primaryRole = userDetails.getAuthorities().stream()
+        List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
-                .findFirst()
-                .orElse("ROLE_USER");
+                .collect(Collectors.toList());
 
-        // Generate token string (for API use)
-        String jwtToken = jwtUtils.generateTokenFromUsername(userDetails.getUsername());
+        UserInfoResponse response = new UserInfoResponse(userDetails.getId(),
+                userDetails.getUsername(), roles, userDetails.getEmail(), jwtCookie.toString());
 
-        // Build user info response
-        UserInfoResponse userInfo = new UserInfoResponse(
-                userDetails.getId(),
-                userDetails.getUsername(),
-                List.of(primaryRole),// return only one role
-                userDetails.getEmail(),
-                jwtToken               // include token in response
-        );
-
-        // Prepare result map with cookie and response body
-        Map<String, Object> result = new HashMap<>();
-        result.put("userInfo", userInfo);
-        result.put("jwtCookie", jwtCookie);
-
-        return result;
+        return new AuthenticationResult(response, jwtCookie);
     }
 
-
     @Override
-    public MessageResponse registerUser(SignupRequest signUpRequest) {
+    public ResponseEntity<MessageResponse> register(SignupRequest signUpRequest) {
         if (userRepository.existsByUserName(signUpRequest.getUsername())) {
-            throw new APIException("Error: Username is already taken!");
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            throw new APIException("Error: Email is already in use!");
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
 
-        User user = new User(
-                signUpRequest.getUsername(),
+        // Create new user's account
+        User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
-                encoder.encode(signUpRequest.getPassword())
-        );
+                encoder.encode(signUpRequest.getPassword()));
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
 
         if (strRoles == null) {
             Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
-                    .orElseThrow(() -> new ResourceNotFoundException("Role", "roleName", "ROLE_USER"));
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
         } else {
             strRoles.forEach(role -> {
-                switch (role.toLowerCase()) {
+                switch (role) {
                     case "admin":
                         Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
-                                .orElseThrow(() -> new ResourceNotFoundException("Role", "roleName", "ROLE_ADMIN"));
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(adminRole);
+
                         break;
                     case "seller":
-                        Role sellerRole = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
-                                .orElseThrow(() -> new ResourceNotFoundException("Role", "roleName", "ROLE_SELLER"));
-                        roles.add(sellerRole);
+                        Role modRole = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        roles.add(modRole);
+
                         break;
                     default:
                         Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
-                                .orElseThrow(() -> new ResourceNotFoundException("Role", "roleName", "ROLE_USER"));
+                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
                         roles.add(userRole);
                 }
             });
@@ -139,8 +122,79 @@ public class AuthServiceImpl implements AuthService {
 
         user.setRoles(roles);
         userRepository.save(user);
-
-        return new MessageResponse("User registered successfully!");
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
-}
 
+    @Override
+    public UserInfoResponse getCurrentUserDetails(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        UserInfoResponse response = new UserInfoResponse(userDetails.getId(),
+                userDetails.getUsername(), roles,userDetails.getEmail(),
+                null );
+
+        return response;
+    }
+
+    @Override
+    public ResponseCookie logoutUser() {
+        return jwtUtils.getCleanJwtCookie();
+    }
+
+
+    @Override
+    public UserResponse getAllSellers(Pageable pageable) {
+
+        Page<User> allUsers =
+                userRepository.findByRoleName(AppRole.ROLE_SELLER, pageable);
+
+        List<UserDTO> userDtos = allUsers.getContent()
+                .stream()
+                .map(user -> {
+
+                    UserDTO dto = new UserDTO();
+
+                    dto.setUserId(user.getUserId());
+                    dto.setUsername(user.getUserName());
+                    dto.setEmail(user.getEmail());
+
+                    // optional but instructor has it
+                    dto.setPassword(null);
+
+                    // convert Role entity -> RoleDTO
+                    Set<RoleDTO> roleDtos = user.getRoles().stream()
+                            .map(r -> new RoleDTO(
+                                    r.getRoleID().longValue(),
+                                    r.getRoleName().name()
+                            ))
+                            .collect(Collectors.toSet());
+
+                    dto.setRoles(roleDtos);
+
+                    dto.setAddress(null);
+                    dto.setCart(null);
+
+                    return dto;
+                })
+                .toList();
+
+        UserResponse response = new UserResponse();
+        response.setContent(userDtos);
+        response.setPageNumber(allUsers.getNumber());
+        response.setPageSize(allUsers.getSize());
+        response.setTotalElements(allUsers.getTotalElements());
+        response.setTotalPages(allUsers.getTotalPages());
+        response.setLastPage(allUsers.isLast());
+
+        return response;
+    }
+
+
+
+
+
+}

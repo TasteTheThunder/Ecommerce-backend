@@ -2,14 +2,12 @@ package EcommerceProject.service;
 
 import EcommerceProject.Exception.APIException;
 import EcommerceProject.Exception.ResourceNotFoundException;
-import EcommerceProject.Model.Cart;
-import EcommerceProject.Model.CartItem;
-import EcommerceProject.Model.Category;
-import EcommerceProject.Model.Product;
+import EcommerceProject.Model.*;
 import EcommerceProject.payload.*;
 import EcommerceProject.repositories.CartRepository;
 import EcommerceProject.repositories.CategoryRepository;
 import EcommerceProject.repositories.ProductRepository;
+import EcommerceProject.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +44,9 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private FileService fileService;
 
+    @Autowired
+    private AuthUtil authUtil;
+
     @Value("${project.image}")
     private String path;
     @Value("${image.base.url}")
@@ -71,6 +72,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = modelMapper.map(productDTO, Product.class);
             product.setImage("default.png");
             product.setCategory(category);
+            product.setUser(authUtil.loggedInUser());
             double specialPrice = product.getPrice() -
                     ((product.getDiscount() * 0.01) * product.getPrice());
             product.setSpecialPrice(specialPrice);
@@ -297,6 +299,37 @@ public class ProductServiceImpl implements ProductService {
 
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
         Page<Product> pageProducts = productRepository.findAll(pageDetails);
+
+        List<Product> products = pageProducts.getContent();
+
+        List<ProductDTO> productDTOS = products.stream()
+                .map(product -> {
+                    ProductDTO productDTO = modelMapper.map(product, ProductDTO.class);
+                    productDTO.setImage(constructImageURL(product.getImage()));
+                    return productDTO;
+                })
+                .toList();
+
+        ProductResponse productResponse = new ProductResponse();
+        productResponse.setContent(productDTOS);
+        productResponse.setPageNumber(pageProducts.getNumber());
+        productResponse.setPageSize(pageProducts.getSize());
+        productResponse.setTotalElements(pageProducts.getTotalElements());
+        productResponse.setTotalPages(pageProducts.getTotalPages());
+        productResponse.setLastPage(pageProducts.isLast());
+        return productResponse;
+    }
+
+    @Override
+    public ProductResponse getAllProductsForSeller(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        User user = authUtil.loggedInUser();
+        Page<Product> pageProducts = productRepository.findByUser(user, pageDetails);
 
         List<Product> products = pageProducts.getContent();
 

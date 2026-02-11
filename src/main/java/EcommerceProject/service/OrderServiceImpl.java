@@ -7,6 +7,7 @@ import EcommerceProject.payload.OrderDTO;
 import EcommerceProject.payload.OrderItemDTO;
 import EcommerceProject.payload.OrderResponse;
 import EcommerceProject.repositories.*;
+import EcommerceProject.util.AuthUtil;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     ProductRepository productRepository;
+
+    @Autowired
+    AuthUtil authUtil;
 
     @Override
     @Transactional
@@ -140,5 +144,41 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(status);
         orderRepository.save(order);
         return modelMapper.map(order, OrderDTO.class);
+    }
+
+    @Override
+    public OrderResponse getAllSellerOrders(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
+
+        User seller = authUtil.loggedInUser();
+
+        Page<Order> pageOrders = orderRepository.findAll(pageDetails);
+
+        List<Order> sellerOrders = pageOrders.getContent().stream()
+                .filter(order -> order.getOrderItems().stream()
+                        .anyMatch(orderItem -> {
+                            var product = orderItem.getProduct();
+                            if (product == null || product.getUser() == null) {
+                                return false;
+                            }
+                            return product.getUser().getUserId().equals(
+                                    seller.getUserId());
+                        }))
+                .toList();
+
+        List<OrderDTO> orderDTOs = sellerOrders.stream()
+                .map(order -> modelMapper.map(order, OrderDTO.class))
+                .toList();
+        OrderResponse orderResponse = new OrderResponse();
+        orderResponse.setContent(orderDTOs);
+        orderResponse.setPageNumber(pageOrders.getNumber());
+        orderResponse.setPageSize(pageOrders.getSize());
+        orderResponse.setTotalElements(pageOrders.getTotalElements());
+        orderResponse.setTotalPages(pageOrders.getTotalPages());
+        orderResponse.setLastPage(pageOrders.isLast());
+        return orderResponse;
     }
 }
