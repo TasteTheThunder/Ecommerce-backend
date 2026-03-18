@@ -9,13 +9,13 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/TasteTheThunder/Ecommerce-backend.git'
+                checkout scm   // ✅ better than hardcoding repo
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean install -DskipTests'
             }
         }
 
@@ -34,7 +34,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh '''
-                # Apply infra (NO secret.yaml)
+                # Apply infra (safe)
                 kubectl apply -f k8s/postgres-config.yaml
                 kubectl apply -f k8s/configmap.yaml
                 kubectl apply -f k8s/postgres-deployment.yaml
@@ -42,7 +42,7 @@ pipeline {
                 kubectl apply -f k8s/app-deployment.yaml
                 kubectl apply -f k8s/app-service.yaml
 
-                # Rolling update
+                # Update image (rolling)
                 kubectl set image deployment/sb-ecom sb-ecom=$DOCKER_IMAGE:${BUILD_NUMBER} || true
                 '''
             }
