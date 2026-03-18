@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: sb-ecom-service
 spec:
-  type: NodePort
+  type: LoadBalancer   # 🔥 changed from NodePort
   selector:
     app: sb-ecom
   ports:
     - port: 80
       targetPort: 9090
-      nodePort: 30007
+      protocol: TCP
