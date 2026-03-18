@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sb-ecom
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sb-ecom
+  template:
+    metadata:
+      labels:
+        app: sb-ecom
+    spec:
+      containers:
+        - name: sb-ecom
+          image: tastethethunder/sb-ecom:latest
+          ports:
+            - containerPort: 9090
+
+          envFrom:
+            - configMapRef:
+                name: sb-ecom-config
+            - secretRef:
+                name: sb-ecom-secret
