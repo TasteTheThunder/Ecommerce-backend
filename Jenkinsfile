@@ -2,18 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // 🔴 Your DockerHub repo (already correct)
         DOCKER_IMAGE = "tastethethunder/sb-ecom"
     }
 
     stages {
-
-        stage('Checkout Code') {
-            steps {
-                // 🔴 Your GitHub repo (already correct)
-                git 'https://github.com/TasteTheThunder/Ecommerce-backend.git'
-            }
-        }
 
         stage('Build & Test') {
             steps {
@@ -29,7 +21,6 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                // 🔴 Works because you already did `docker login`
                 sh "docker push $DOCKER_IMAGE:${BUILD_NUMBER}"
             }
         }
@@ -37,7 +28,6 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 sh """
-                // 🔴 MUST match your deployment.yaml
                 kubectl set image deployment/sb-ecom \
                 sb-ecom=$DOCKER_IMAGE:${BUILD_NUMBER}
                 """
