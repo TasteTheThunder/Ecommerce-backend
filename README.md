@@ -1,18 +1,36 @@
-# Sb-Ecom
+<div align="center">
 
-Sb-Ecom is a Spring Boot 3.5 ecommerce backend for building and running a full store workflow: authentication, catalog browsing, cart and order management, address handling, analytics, and Stripe-based payment initialization.
+# 🛒 Sb-Ecom
 
-It combines a layered backend architecture with Docker and Kubernetes deployment support, making it suitable for local development, containerized runs, and cluster deployment.
+**A production-ready Spring Boot e-commerce backend** — authentication, catalog, cart, orders, payments, and multi-role access, fully containerized and cluster-ready.
 
-## Live Demo
+[![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](.)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen?logo=springboot)](.)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue?logo=postgresql)](.)
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker)](.)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-manifests-326CE5?logo=kubernetes)](.)
+[![Stripe](https://img.shields.io/badge/Stripe-integrated-635BFF?logo=stripe)](.)
 
-Swagger UI: https://sb-ecom-latest-yf4p.onrender.com/swagger-ui/index.html
+[Live Demo](#-live-demo) · [API Overview](#-api-overview) · [Local Setup](#-local-development) · [Deployment](#-docker--kubernetes)
 
-OpenAPI JSON: https://sb-ecom-latest-yf4p.onrender.com/v3/api-docs
+</div>
 
-> Note: hosted on Render's free tier — the service spins down after inactivity, so the first request may take ~30-50s to wake up.
+---
 
-## Architecture
+## 📖 Overview
+
+Sb-Ecom powers a full store workflow — user auth, catalog browsing, cart & order management, address handling, analytics, and Stripe-based payment initialization — behind a clean, layered backend architecture. It ships with Docker and Kubernetes manifests, so it runs the same way locally, in a container, or in a cluster.
+
+## 🔗 Live Demo
+
+| Resource | Link |
+|---|---|
+| 🌐 Swagger UI | [sb-ecom-latest-yf4p.onrender.com/swagger-ui/index.html](https://sb-ecom-latest-yf4p.onrender.com/swagger-ui/index.html) |
+| 📄 OpenAPI JSON | [sb-ecom-latest-yf4p.onrender.com/v3/api-docs](https://sb-ecom-latest-yf4p.onrender.com/v3/api-docs) |
+
+> ⏳ **Note:** Hosted on Render's free tier — the service spins down after inactivity, so the first request may take ~30–50s to wake up.
+
+## 🏗️ Architecture
 
 ```mermaid
 flowchart TB
@@ -22,65 +40,77 @@ flowchart TB
 	Controllers --> Services[Service Layer]
 	Services --> Repos[Spring Data Repositories]
 	Repos --> Db[(PostgreSQL)]
-	Services --> Storage[Image Storage\nimages/]
+	Services --> Storage[Image Storage / images]
 	Services --> Stripe[Stripe Payment Intents]
 	Api --> Docs[Swagger / OpenAPI]
 	Api --> Docker[Docker Image]
 	Docker --> K8s[Kubernetes Deployment]
 ```
 
-## Highlights
+## ✨ Highlights
 
-- JWT-based sign-in and sign-out with secure cookie handling
-- Role-based access for public, user, seller, and admin endpoints
-- Product and category management with pagination, sorting, and keyword search
-- Cart and order workflows with address management
-- Stripe payment intent generation for checkout flows
-- Static image serving from the local `images/` directory
-- Swagger UI with bearer-auth support
-- Docker and Kubernetes manifests included
+- 🔐 JWT-based sign-in/sign-out with secure cookie handling
+- 👥 Role-based access — public, user, seller, and admin endpoints
+- 📦 Product & category management with pagination, sorting, keyword search
+- 🛒 Cart and order workflows with address management
+- 💳 Stripe payment intent generation for checkout flows
+- 🖼️ Static image serving and upload support
+- 📘 Swagger UI with bearer-auth support
+- 🐳 Docker and ☸️ Kubernetes manifests included
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- Java 21
-- Spring Boot 3.5.5
-- Spring Web, Spring Data JPA, Spring Security, Validation
-- PostgreSQL
-- JWT via JJWT
-- ModelMapper
-- Stripe Java SDK
-- springdoc-openapi
+| Layer | Technology |
+|---|---|
+| Language | Java 21 |
+| Framework | Spring Boot 3.5.5 (Web, Data JPA, Security, Validation) |
+| Database | PostgreSQL |
+| Auth | JWT (JJWT) |
+| Payments | Stripe Java SDK |
+| Mapping | ModelMapper |
+| API Docs | springdoc-openapi |
+| Deployment | Docker, Kubernetes |
 
-## Project Structure
+## 📁 Project Structure
 
-- `src/main/java/EcommerceProject/Controller` - REST controllers
-- `src/main/java/EcommerceProject/service` - business logic
-- `src/main/java/EcommerceProject/repositories` - JPA repositories
-- `src/main/java/EcommerceProject/Model` - entities
-- `src/main/java/EcommerceProject/payload` - DTOs and response models
-- `src/main/java/EcommerceProject/Security` - JWT, auth, and security configuration
-- `src/main/java/EcommerceProject/config` - application-wide configuration
-- `src/main/resources` - application properties and static resources
-- `k8s` - Kubernetes manifests
+```
+src/main/java/EcommerceProject/
+├── Controller/      # REST controllers
+├── service/         # Business logic
+├── repositories/     # Spring Data JPA repositories
+├── Model/           # Entities
+├── payload/         # DTOs and response models
+├── Security/        # JWT, auth, security configuration
+└── config/          # Application-wide configuration
+src/main/resources/   # App properties, static resources
+k8s/                  # Kubernetes manifests
+```
 
-## Core Modules
+## 🧩 Core Modules
 
-### Authentication and user management
+<details>
+<summary><b>Authentication & User Management</b></summary>
 
 - Register a new account
 - Sign in and receive a JWT cookie
 - Sign out by clearing the cookie
-- Retrieve the current username and user details
+- Retrieve current username and user details
 - List sellers
 
-### Catalog management
+</details>
+
+<details>
+<summary><b>Catalog Management</b></summary>
 
 - Public category and product browsing
 - Admin and seller product CRUD operations
 - Product image upload
 - Keyword search and category filtering
 
-### Cart and checkout
+</details>
+
+<details>
+<summary><b>Cart & Checkout</b></summary>
 
 - Create or update carts with items
 - Add products to cart by quantity
@@ -88,21 +118,30 @@ flowchart TB
 - Place orders from the authenticated user context
 - Generate Stripe client secrets for payment flows
 
-### Order and admin operations
+</details>
+
+<details>
+<summary><b>Order & Admin Operations</b></summary>
 
 - View all orders as an admin
 - View seller-specific orders
 - Update order status for admin and seller roles
 - View application analytics
 
-### Address management
+</details>
+
+<details>
+<summary><b>Address Management</b></summary>
 
 - Create, read, update, and delete addresses
 - Fetch addresses for the authenticated user
 
-## API Overview
+</details>
 
-### Auth
+## 📡 API Overview
+
+<details>
+<summary><b>🔑 Auth</b></summary>
 
 | Method | Endpoint | Notes |
 | --- | --- | --- |
@@ -113,7 +152,10 @@ flowchart TB
 | GET | `/api/auth/user` | Current authenticated user details |
 | GET | `/api/auth/sellers` | Paginated seller listing |
 
-### Public catalog
+</details>
+
+<details>
+<summary><b>🛍️ Public Catalog</b></summary>
 
 | Method | Endpoint | Notes |
 | --- | --- | --- |
@@ -122,7 +164,10 @@ flowchart TB
 | GET | `/api/public/categories/{categoryId}/products` | Products for a category |
 | GET | `/api/public/products/keyword/{keyword}` | Keyword search |
 
-### Admin and seller catalog
+</details>
+
+<details>
+<summary><b>🛠️ Admin & Seller Catalog</b></summary>
 
 | Method | Endpoint | Notes |
 | --- | --- | --- |
@@ -137,7 +182,10 @@ flowchart TB
 | GET | `/api/admin/products` | Paginated admin product list |
 | GET | `/api/seller/products` | Paginated seller product list |
 
-### Categories
+</details>
+
+<details>
+<summary><b>🏷️ Categories</b></summary>
 
 | Method | Endpoint | Notes |
 | --- | --- | --- |
@@ -146,7 +194,10 @@ flowchart TB
 | PUT | `/api/admin/categories/{categoryId}` | Update category |
 | DELETE | `/api/admin/categories/{categoryId}` | Delete category |
 
-### Cart
+</details>
+
+<details>
+<summary><b>🛒 Cart</b></summary>
 
 | Method | Endpoint | Notes |
 | --- | --- | --- |
@@ -157,7 +208,10 @@ flowchart TB
 | PUT | `/api/cart/products/{productId}/quantity/{operation}` | Update cart quantity |
 | DELETE | `/api/carts/{cartId}/product/{productId}` | Remove a product from cart |
 
-### Addresses
+</details>
+
+<details>
+<summary><b>📍 Addresses</b></summary>
 
 | Method | Endpoint | Notes |
 | --- | --- | --- |
@@ -168,7 +222,10 @@ flowchart TB
 | PUT | `/api/addresses/{addressId}` | Update address |
 | DELETE | `/api/addresses/{addressId}` | Delete address |
 
-### Orders, payments, and analytics
+</details>
+
+<details>
+<summary><b>📦 Orders, Payments & Analytics</b></summary>
 
 | Method | Endpoint | Notes |
 | --- | --- | --- |
@@ -180,22 +237,22 @@ flowchart TB
 | PUT | `/api/seller/orders/{orderId}/status` | Update order status as seller |
 | GET | `/api/admin/app/analytics` | Application analytics |
 
-## Security and Access Rules
+</details>
+
+## 🔒 Security & Access Rules
 
 - `/api/auth/**`, `/api/public/**`, Swagger endpoints, `/images/**`, and CORS preflight requests are public.
 - `/api/admin/**` requires the `ADMIN` role.
 - `/api/seller/**` requires `ADMIN` or `SELLER` roles.
-- JWT is stored in a cookie whose name is configured through `JWT_COOKIE_NAME`.
-- CORS is configured to allow the frontend origin defined by `FRONTEND_URL`.
+- JWT is stored in a cookie whose name is configured via `JWT_COOKIE_NAME`.
+- CORS allows only the origin defined by `FRONTEND_URL`.
 
-## Environment Variables
-
-The application reads configuration from environment variables and does not hardcode database or secret values.
+## ⚙️ Environment Variables
 
 | Variable | Purpose |
 | --- | --- |
 | `SPRING_APPLICATION_NAME` | Spring application name |
-| `PORT` | Server port fallback, defaults to `9090` |
+| `PORT` | Server port fallback (default `9090`) |
 | `DB_URL` | PostgreSQL JDBC URL |
 | `DB_USERNAME` | Database username |
 | `DB_PASSWORD` | Database password |
@@ -203,26 +260,21 @@ The application reads configuration from environment variables and does not hard
 | `HIBERNATE_DIALECT` | Hibernate dialect |
 | `PROJECT_IMAGE_PATH` | Local image storage directory |
 | `JWT_SECRET` | Base64-encoded JWT signing secret |
-| `JWT_EXPIRATION` | JWT expiration in milliseconds |
+| `JWT_EXPIRATION` | JWT expiration (ms) |
 | `JWT_COOKIE_NAME` | Cookie name used for JWT storage |
 | `FRONTEND_URL` | Allowed frontend origin for CORS |
 | `IMAGE_BASE_URL` | Public base URL for images |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
 
-## Local Development
+## 🚀 Local Development
 
 ### Prerequisites
-
 - Java 21
 - Maven 3.9+
 - PostgreSQL 14+
-- A valid Stripe secret key if you want to exercise payment intent creation
+- A valid Stripe secret key (optional, for payment intent testing)
 
 ### 1. Configure environment variables
-
-Set the variables above in your shell, IDE run configuration, or a `.env` file consumed by your local process manager.
-
-Example PowerShell session:
 
 ```powershell
 $env:SPRING_APPLICATION_NAME="Sb-Ecom"
@@ -242,29 +294,20 @@ $env:STRIPE_SECRET_KEY="sk_test_your_key"
 ```
 
 ### 2. Start PostgreSQL
-
-Create a database named `ecommerce` and make sure the credentials match the environment variables.
+Create a database named `ecommerce` matching the credentials above.
 
 ### 3. Run the application
 
 ```bash
 ./mvnw spring-boot:run
 ```
-
-On Windows, you can also use:
-
-```powershell
-.\mvnw.cmd spring-boot:run
-```
+On Windows: `.\mvnw.cmd spring-boot:run`
 
 ### 4. Open the API documentation
-
 - Swagger UI: `http://localhost:9090/swagger-ui/index.html`
 - OpenAPI JSON: `http://localhost:9090/v3/api-docs`
 
-## Default Seed Accounts
-
-The security configuration seeds demo users on startup if they do not already exist.
+## 👤 Default Seed Accounts
 
 | Username | Password | Roles |
 | --- | --- | --- |
@@ -272,39 +315,32 @@ The security configuration seeds demo users on startup if they do not already ex
 | `seller1` | `password2` | `ROLE_SELLER` |
 | `admin` | `adminPass` | `ROLE_USER`, `ROLE_SELLER`, `ROLE_ADMIN` |
 
-## Images
+## 🖼️ Images
 
-- Uploaded or served images are exposed under `/images/**`.
-- The physical storage location is configured by `PROJECT_IMAGE_PATH` and mapped in `WebMvcConfig`.
+Uploaded/served images are exposed under `/images/**`. Physical storage location is configured via `PROJECT_IMAGE_PATH` and mapped in `WebMvcConfig`.
 
-## Docker
+## 🐳 Docker & ☸️ Kubernetes
 
-Build the image:
-
+**Docker**
 ```bash
 docker build -t sb-ecom .
-```
-
-Run the container:
-
-```bash
 docker run -p 9090:9090 --env-file .env sb-ecom
 ```
 
-## Kubernetes
-
-The `k8s/` directory contains manifests for the application, PostgreSQL, config maps, and secrets. The app deployment expects the same environment variables described above to be provided through `ConfigMap` and `Secret` resources.
-
-Typical workflow:
-
+**Kubernetes** — the `k8s/` directory contains manifests for the app, PostgreSQL, config maps, and secrets.
 ```bash
 kubectl apply -f k8s/
 ```
 
-## Notes
+## 📝 Notes
 
-- The project uses Spring Security with stateless JWT auth.
+- Stateless JWT auth via Spring Security.
 - Product browsing endpoints are paginated and sortable.
 - Swagger supports bearer authentication for protected endpoints.
-- The repository is ready for local development, containerization, and cluster deployment.
+- Ready for local development, containerization, and cluster deployment.
 
+---
+
+<div align="center">
+Built with ☕ and Spring Boot
+</div>
