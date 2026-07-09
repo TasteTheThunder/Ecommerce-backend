@@ -4,6 +4,14 @@ Sb-Ecom is a Spring Boot 3.5 ecommerce backend for building and running a full s
 
 It combines a layered backend architecture with Docker and Kubernetes deployment support, making it suitable for local development, containerized runs, and cluster deployment.
 
+## Live Demo
+
+Swagger UI: https://sb-ecom-latest-yf4p.onrender.com/swagger-ui/index.html
+
+OpenAPI JSON: https://sb-ecom-latest-yf4p.onrender.com/v3/api-docs
+
+> Note: hosted on Render's free tier — the service spins down after inactivity, so the first request may take ~30-50s to wake up.
+
 ## Architecture
 
 ```mermaid
