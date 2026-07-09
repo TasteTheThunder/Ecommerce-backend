@@ -11,7 +11,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-manifests-326CE5?logo=kubernetes)](.)
 [![Stripe](https://img.shields.io/badge/Stripe-integrated-635BFF?logo=stripe)](.)
 
-[Live Demo](#-live-demo) · [API Overview](#-api-overview) · [Local Setup](#-local-development) · [Deployment](#-docker--kubernetes)
+[Live Demo](#-live-demo) · [API Overview](#-api-overview-click-to-expand-each-section) · [Local Setup](#-local-development) · [Deployment](#docker--kubernetes)
 
 </div>
 
@@ -86,7 +86,7 @@ src/main/resources/   # App properties, static resources
 k8s/                  # Kubernetes manifests
 ```
 
-## 🧩 Core Modules
+## 🧩 Core Modules *(click each section to expand)*
 
 <details>
 <summary><b>Authentication & User Management</b></summary>
@@ -138,7 +138,7 @@ k8s/                  # Kubernetes manifests
 
 </details>
 
-## 📡 API Overview
+## 📡 API Overview *(click to expand each section)*
 
 <details>
 <summary><b>🔑 Auth</b></summary>
@@ -319,7 +319,7 @@ On Windows: `.\mvnw.cmd spring-boot:run`
 
 Uploaded/served images are exposed under `/images/**`. Physical storage location is configured via `PROJECT_IMAGE_PATH` and mapped in `WebMvcConfig`.
 
-## 🐳 Docker & ☸️ Kubernetes
+## Docker & Kubernetes
 
 **Docker**
 ```bash
